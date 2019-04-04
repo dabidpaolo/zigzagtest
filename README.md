@@ -23,7 +23,7 @@ Use ```deploy.sh``` using the parameters REF and IP
 ```
 The first parameter checkouts the branch/tag that is to be deployed while the second parameter is the public IP of the instance that is created when the CloudFormation stack is deployed.
 
-Improvement: Upload the tarball created from ```deploy.sh``` to an S3 or a similar storage that is accessible from the instance. From there, we can add a function on the cloudformation-user-data to download and run the code during start up. This way, we can minimize , if not totally iradicate, the downtime of the app whenever the instance terminates or becomes unavailable.
+Improvement: Upload the tarball created from ```deploy.sh``` to a S3 bucket or a similar storage that is accessible from the instance. From there, we can add a function on the cloudformation's launch config user-data to download and run the code during start up. This way, we can minimize , if not totally iradicate, the downtime of the app whenever the instance terminates or becomes unavailable.
 
 Decisions
 1. Code is checkedout/cloned locally first before transferring to the server to make sure that only users with access to the repository can deploy changes to the app.
