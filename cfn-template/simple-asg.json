@@ -1,16 +1,16 @@
 {
-  "Description": "BOT Auto Scaling Group for SEOCMS Pimcore",
+  "Description": "BOT Auto Scaling Group for SINATRACMS Pimcore",
   "Parameters": {
     "NodeSecurityGroups": {
       "Type": "CommaDelimitedList",
       "Default": "sg-09a07119d65d3df03",
-      "Description": "Security groups for SEOCMS instances."
+      "Description": "Security groups for SINATRACMS instances."
     },
 
     "Ec2Subnets": {
       "Type": "CommaDelimitedList",
       "Default": "subnet-0efafb559083137bb",
-      "Description": "Subnets for SEOCMS instances."
+      "Description": "Subnets for SINATRACMS instances."
     },
 
     "HealthCheckType": {
@@ -22,46 +22,46 @@
       "Type": "String"
     },
 
-    "ImageIdSEOCMSApi": {
+    "ImageIdSINATRACMSApi": {
       "Type": "AWS::EC2::Image::Id",
       "Default": "ami-ac3f71cf",
-      "Description": "Image ID for SEOCMS Api instances."
+      "Description": "Image ID for SINATRACMS Api instances."
     },
 
-    "InstanceTypeSEOCMSApi": {
+    "InstanceTypeSINATRACMSApi": {
       "Type": "String",
       "Default": "t2.micro",
-      "Description": "Instance type for SEOCMS Api FE instances."
+      "Description": "Instance type for SINATRACMS Api FE instances."
     },
 
-    "InstanceNameSEOCMSApi": {
+    "InstanceNameSINATRACMSApi": {
         "Type": "String",
         "Default": "zigzag-test-stage",
-        "Description": "Instance name for SEOCMS Api FE instances."
+        "Description": "Instance name for SINATRACMS Api FE instances."
       },
 
     "KeyName": {
       "Type": "AWS::EC2::KeyPair::KeyName",
       "Default": "zigzag-test-stage",
-    "Description": "Key Pair Name for SEOCMS instances."
+    "Description": "Key Pair Name for SINATRACMS instances."
     },
 
-    "DesiredCapacitySEOCMSApi": {
+    "DesiredCapacitySINATRACMSApi": {
       "Type": "String",
       "Default": "1",
-    "Description": "Desired number of instance in ASG for SEOCMS FE."
+    "Description": "Desired number of instance in ASG for SINATRACMS FE."
     },
 
-    "MinSizeSEOCMSApi": {
+    "MinSizeSINATRACMSApi": {
       "Type": "String",
       "Default": "1",
-    "Description": "Minumim size for ASG for SEOCMS FE instances"
+    "Description": "Minumim size for ASG for SINATRACMS FE instances"
     },
 
-    "MaxSizeSEOCMSApi": {
+    "MaxSizeSINATRACMSApi": {
       "Type": "String",
       "Default": "2",
-    "Description": "Maximum size for ASG for SEOCMS FE instances"
+    "Description": "Maximum size for ASG for SINATRACMS FE instances"
     },
 
     "HealthCheckGracePeriod": {
@@ -109,7 +109,7 @@
 
   "Resources": {
 
-    "AutoScalingGroupSEOCMSApi": {
+    "AutoScalingGroupSINATRACMSApi": {
     "UpdatePolicy" : {
     "AutoScalingRollingUpdate" : {
       "MaxBatchSize" : "1",
@@ -119,24 +119,24 @@
         },
     "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
-        "DesiredCapacity": { "Ref": "DesiredCapacitySEOCMSApi" },
+        "DesiredCapacity": { "Ref": "DesiredCapacitySINATRACMSApi" },
         "HealthCheckType": { "Ref": "HealthCheckType" },
         "HealthCheckGracePeriod": "300",
-        "LaunchConfigurationName": { "Ref": "LaunchConfigurationSEOCMSApi" },
-        "MaxSize": { "Ref": "MaxSizeSEOCMSApi" },
-        "MinSize": { "Ref": "MinSizeSEOCMSApi" },
+        "LaunchConfigurationName": { "Ref": "LaunchConfigurationSINATRACMSApi" },
+        "MaxSize": { "Ref": "MaxSizeSINATRACMSApi" },
+        "MinSize": { "Ref": "MinSizeSINATRACMSApi" },
         "VPCZoneIdentifier": { "Ref": "Ec2Subnets" },
         "Tags": [
           {
             "Key": "Name",
-            "Value": { "Ref": "InstanceNameSEOCMSApi" },
+            "Value": { "Ref": "InstanceNameSINATRACMSApi" },
             "PropagateAtLaunch": "true"
           }
         ]
       }
     },
 
-    "InstanceRoleSEOCMSApi": {
+    "InstanceRoleSINATRACMSApi": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -160,15 +160,15 @@
       }
     },
 
-    "InstanceRoleInstanceProfileSEOCMSApi": {
+    "InstanceRoleInstanceProfileSINATRACMSApi": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
         "Path": "/",
-        "Roles": [ { "Ref": "InstanceRoleSEOCMSApi" } ]
+        "Roles": [ { "Ref": "InstanceRoleSINATRACMSApi" } ]
       }
     },
 
-    "InstanceRolePoliciesSEOCMSApi": {
+    "InstanceRolePoliciesSINATRACMSApi": {
     "Type": "AWS::IAM::Policy",
       "Properties": {
         "PolicyDocument": {
@@ -185,12 +185,12 @@
             }
           ]
         },
-        "PolicyName": "InstanceRoleSEOCMSApi",
-        "Roles": [ { "Ref": "InstanceRoleSEOCMSApi" } ]
+        "PolicyName": "InstanceRoleSINATRACMSApi",
+        "Roles": [ { "Ref": "InstanceRoleSINATRACMSApi" } ]
       }
     },
 
-    "LaunchConfigurationSEOCMSApi": {
+    "LaunchConfigurationSINATRACMSApi": {
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Metadata": {
         "AWS::CloudFormation::Init": {
@@ -222,9 +222,9 @@
         },
         "Properties": {
                 "AssociatePublicIpAddress": "True",
-                "IamInstanceProfile": { "Ref": "InstanceRoleInstanceProfileSEOCMSApi" },
-                "ImageId": { "Ref": "ImageIdSEOCMSApi" },
-                "InstanceType": { "Ref": "InstanceTypeSEOCMSApi" },
+                "IamInstanceProfile": { "Ref": "InstanceRoleInstanceProfileSINATRACMSApi" },
+                "ImageId": { "Ref": "ImageIdSINATRACMSApi" },
+                "InstanceType": { "Ref": "InstanceTypeSINATRACMSApi" },
                 "KeyName": { "Ref": "KeyName" },
                 "SecurityGroups": { "Ref": "NodeSecurityGroups" },
                 "UserData": {
