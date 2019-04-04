@@ -1,0 +1,258 @@
+{
+  "Description": "BOT Auto Scaling Group for SEOCMS Pimcore",
+  "Parameters": {
+    "NodeSecurityGroups": {
+      "Type": "CommaDelimitedList",
+      "Default": "sg-09a07119d65d3df03",
+      "Description": "Security groups for SEOCMS instances."
+    },
+
+    "Ec2Subnets": {
+      "Type": "CommaDelimitedList",
+      "Default": "subnet-0efafb559083137bb",
+      "Description": "Subnets for SEOCMS instances."
+    },
+
+    "HealthCheckType": {
+      "AllowedValues": [
+        "EC2",
+        "ELB"
+      ],
+      "Default": "ELB",
+      "Type": "String"
+    },
+
+    "ImageIdSEOCMSApi": {
+      "Type": "AWS::EC2::Image::Id",
+      "Default": "ami-ac3f71cf",
+      "Description": "Image ID for SEOCMS Api instances."
+    },
+
+    "InstanceTypeSEOCMSApi": {
+      "Type": "String",
+      "Default": "t2.micro",
+      "Description": "Instance type for SEOCMS Api FE instances."
+    },
+
+    "InstanceNameSEOCMSApi": {
+        "Type": "String",
+        "Default": "zigzag-test-stage",
+        "Description": "Instance name for SEOCMS Api FE instances."
+      },
+
+    "KeyName": {
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "Default": "zigzag-test-stage",
+    "Description": "Key Pair Name for SEOCMS instances."
+    },
+
+    "DesiredCapacitySEOCMSApi": {
+      "Type": "String",
+      "Default": "1",
+    "Description": "Desired number of instance in ASG for SEOCMS FE."
+    },
+
+    "MinSizeSEOCMSApi": {
+      "Type": "String",
+      "Default": "1",
+    "Description": "Minumim size for ASG for SEOCMS FE instances"
+    },
+
+    "MaxSizeSEOCMSApi": {
+      "Type": "String",
+      "Default": "2",
+    "Description": "Maximum size for ASG for SEOCMS FE instances"
+    },
+
+    "HealthCheckGracePeriod": {
+      "Default": "300",
+    "Type": "String",
+    "Description": "Healthchech grace period for ASG."
+    },
+
+    "HealthCheckPath": {
+    "Type": "String",
+      "Default": "/",
+    "Description": "Healthchechk path for target group."
+    },
+
+    "HealthCheckIntervalSeconds": {
+    "Type": "String",
+      "Default": "60",
+    "Description": "Healthcheck interval seconds for target group."
+    },
+
+    "HealthCheckTimeoutSeconds": {
+    "Type": "String",
+      "Default": "30",
+    "Description": "Healthcheck timeout seconds for target group."
+    },
+
+    "HealthyThresholdCount": {
+    "Type": "String",
+      "Default": "5",
+    "Description": "Healthcheck healthy threshold count for target group."
+    },
+
+    "UnhealthyThresholdCount": {
+    "Type": "String",
+      "Default": "2",
+    "Description": "Healthcheck unhealthy threshold count for target group."
+    },
+
+    "VpcId": {
+      "Type": "AWS::EC2::VPC::Id",
+      "Default": "vpc-001ed186b9b0d1b47",
+    "Description": "Existing VpcID where these resources created."
+    }
+  },
+
+  "Resources": {
+
+    "AutoScalingGroupSEOCMSApi": {
+    "UpdatePolicy" : {
+    "AutoScalingRollingUpdate" : {
+      "MaxBatchSize" : "1",
+      "MinInstancesInService" : "1",
+      "PauseTime" : "PT5M"
+            }
+        },
+    "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "DesiredCapacity": { "Ref": "DesiredCapacitySEOCMSApi" },
+        "HealthCheckType": { "Ref": "HealthCheckType" },
+        "HealthCheckGracePeriod": "300",
+        "LaunchConfigurationName": { "Ref": "LaunchConfigurationSEOCMSApi" },
+        "MaxSize": { "Ref": "MaxSizeSEOCMSApi" },
+        "MinSize": { "Ref": "MinSizeSEOCMSApi" },
+        "VPCZoneIdentifier": { "Ref": "Ec2Subnets" },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": { "Ref": "InstanceNameSEOCMSApi" },
+            "PropagateAtLaunch": "true"
+          }
+        ]
+      }
+    },
+
+    "InstanceRoleSEOCMSApi": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [ "sts:AssumeRole" ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com",
+                  "ssm.amazonaws.com"
+                ]
+              }
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+        ],
+        "Path": "/"
+      }
+    },
+
+    "InstanceRoleInstanceProfileSEOCMSApi": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [ { "Ref": "InstanceRoleSEOCMSApi" } ]
+      }
+    },
+
+    "InstanceRolePoliciesSEOCMSApi": {
+    "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "autoscaling:Describe*",
+                "cloudformation:Describe*",
+                "cloudformation:GetTemplate",
+                "s3:Get*"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ]
+        },
+        "PolicyName": "InstanceRoleSEOCMSApi",
+        "Roles": [ { "Ref": "InstanceRoleSEOCMSApi" } ]
+      }
+    },
+
+    "LaunchConfigurationSEOCMSApi": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "configSets": {
+            "default": [ "install_cfn" ]
+          },
+            "files": {
+              "/etc/cfn/cfn-hup.conf" : {
+                "content" : { "Fn::Join" : ["", [
+                  "[main]\n",
+                  "stack=", { "Ref" : "AWS::StackId" }, "\n",
+                  "region=", { "Ref" : "AWS::Region" }, "\n"
+                ]]},
+                "mode"    : "000400",
+                "owner"   : "root",
+                "group"   : "root"
+              },
+              "/etc/cfn/hooks.d/cfn-auto-reloader.conf" : {
+                "content": { "Fn::Join" : ["", [
+                  "[cfn-auto-reloader-hook]\n",
+                  "triggers=post.update\n",
+                  "path=Resources.LaunchConfiguration.Metadata.AWS::CloudFormation::Init\n",
+                  "action=cfn-init -v --stack ", { "Ref" : "AWS::StackName" }, " --resource LaunchConfiguration ", " --region ", { "Ref" : "AWS::Region" }, "\n",
+                  "runas=root\n"
+                ]]}
+              }
+            }
+          }
+        },
+        "Properties": {
+                "AssociatePublicIpAddress": "True",
+                "IamInstanceProfile": { "Ref": "InstanceRoleInstanceProfileSEOCMSApi" },
+                "ImageId": { "Ref": "ImageIdSEOCMSApi" },
+                "InstanceType": { "Ref": "InstanceTypeSEOCMSApi" },
+                "KeyName": { "Ref": "KeyName" },
+                "SecurityGroups": { "Ref": "NodeSecurityGroups" },
+                "UserData": {
+                  "Fn::Base64": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "#!/bin/bash -ex\n",
+                        "rm /var/lib/apt/lists/lock\n",
+                        "rm /var/cache/apt/archives/lock\n",
+                        "rm /var/lib/dpkg/lock\n",
+                        "dpkg --configure -a\n",
+                        "apt install -f\n",
+                        "dpkg --configure -a\n",
+                        "apt update\n",
+                        "apt install ruby unzip -y\n",
+                        "gem install bundler\n",
+                        "# Signal the status from cfn-init\n",
+                        "cfn-signal -e $? ",
+                        "         --stack ", { "Ref": "AWS::StackName" },
+                        "         --resource LaunchConfiguration",
+                        "         --region ", { "Ref": "AWS::Region" },
+                        "\n"
+                      ]
+                    ]
+                  }
+                }
+              }
+      }
+    }
+}

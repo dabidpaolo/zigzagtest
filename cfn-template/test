@@ -1,0 +1,57 @@
+{
+
+ "Description" : "CloudFormation Template for testing NR plugin",
+
+  "Parameters" : {
+    "KeyName": {
+      "Description" : "Usap Hydra Key",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "Default": "zigzag-test-stage"
+
+    },
+
+    "VpcId": {
+      "Type": "AWS::EC2::VPC::Id",
+      "Default": "vpc-001ed186b9b0d1b47",
+      "Description": "Existing VpcID where these resources created."
+      },
+
+    "InstanceType" : {
+      "Description" : "Mongo instance for SEO initiative",
+      "Type" : "String",
+      "Default" : "t2.micro"
+    },
+    "JCWSecurityGroup1": {
+      "Type": "String",
+      "Default": "sg-09a07119d65d3df03",
+      "Description": "Security groups for SEO mongo instances."
+    },
+    "ImageIdJCW": {
+      "Type": "AWS::EC2::Image::Id",
+      "Default": "ami-0b419c3a4b01d1859",
+      "Description": "Image ID for JCW instance."
+      }
+
+    },
+  "Resources" : {
+     "EC2InstanceJCW" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "InstanceType" : { "Ref" : "InstanceType" },
+        "KeyName" : { "Ref" : "KeyName" },
+        "ImageId" : {"Ref": "ImageIdJCW"},
+        "UserData" : "IiMhL2Jpbi9iYXNoIC1leFxuIiwKInl1bSB1cGRhdGUgLXlcbiIsCiJ5dW0gaW5zdGFsbCAteSBjdXJsIGdwZyBnY2MgZ2NjLWMrKyBtYWtlXG4iLAoiZ3BnMiAtLXJlY3Yta2V5cyA0MDlCNkIxNzk2QzI3NTQ2MkExNzAzMTEzODA0QkI4MkQzOURDMEUzIDdEMkJBRjFDRjM3QjEzRTIwNjlENjk1NjEwNUJEMEU3Mzk0OTlCREJcbiIsCiJjdXJsIC1zU0wgaHR0cHM6Ly9nZXQucnZtLmlvIHwgc3VkbyBiYXNoIC1zIHN0YWJsZVxuIiwKImdyb3VwYWRkIHJ2bVxuIiwKInVzZXJtb2QgLWEgLUcgcnZtIGB3aG9hbWlgXG4iLAoiaWYgZ3JlcCAtcSBzZWN1cmVfcGF0aCAvZXRjL3N1ZG9lcnM7IHRoZW4gc2ggLWMgXCJlY2hvIGV4cG9ydCBydm1zdWRvX3NlY3VyZV9wYXRoPTEgPj4gL2V0Yy9wcm9maWxlLmQvcnZtX3NlY3VyZV9wYXRoLnNoXCIgJiYgZWNobyBFbnZpcm9ubWVudCB2YXJpYWJsZSBpbnN0YWxsZWQ7IGZpXG4iLAoic291cmNlIH4vLnJ2bS9zY3JpcHRzL3J2bVxuIiwKInJ2bSBnZXQgaGVhZFxuIiwKInJ2bSBsaXN0IGtub3duXG4iLAoicnZtIGluc3RhbGwgMi41LjFcbiIsCiJydWJ5IC0tdmVyc2lvblxuIiwKInl1bSBpbnN0YWxsIGdpdFxuIg==",
+        "Tags" : [
+          {"Key" : "Name", "Value" : "zigzag-test"}
+        ],
+        "NetworkInterfaces" : [{
+          "AssociatePublicIpAddress" : "True",
+          "DeleteOnTermination" : "True",
+          "DeviceIndex" : "0",
+          "GroupSet" : [ { "Ref" : "JCWSecurityGroup1" } ],
+          "SubnetId" : "subnet-0efafb559083137bb"
+        }]
+    }
+
+  }
+}
