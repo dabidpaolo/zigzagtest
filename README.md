@@ -25,7 +25,7 @@ The first parameter checkouts the branch/tag that is to be deployed while the se
 
 Improvement: Upload the tarball created from ```deploy.sh``` to a S3 bucket or a similar storage that is accessible from the instance. From there, we can add a function on the cloudformation's launch config user-data to download and run the code during start up. This way, we can minimize , if not totally iradicate, the downtime of the app whenever the instance terminates or becomes unavailable.
 
-Decisions
+##### Decisions
 1. Code is checkedout/cloned locally first before transferring to the server to make sure that only users with access to the repository can deploy changes to the app.
 2. Dependency installation is only added during the startup to maximize the use of cloudformation for the configuration-as-a-code platform
 3. Instance access is controlled via security group so that we can easily allow users to access the ports needed without going through configuration changes on the server.
